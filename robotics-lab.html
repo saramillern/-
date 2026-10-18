@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a31">
+  <title>Роболаб — собери и запрограммируй робота</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1222;
+      --panel: #131f36;
+      --panel-light: #1a2944;
+      --line: #2a3a57;
+      --text: #f2f5ff;
+      --muted: #a8b4cc;
+      --blue: #78a9ff;
+      --green: #70e0b1;
+      --yellow: #ffd477;
+      --red: #ff8d9c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 15% 0%, #1b2c4d 0, var(--bg) 48rem);
+      color: var(--text);
+      font: 16px/1.5 system-ui, "Segoe UI", sans-serif;
+    }
+    button, select { font: inherit; }
+    button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 8px 13px;
+      background: var(--panel-light);
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color .15s, transform .15s, background .15s;
+    }
+    button:hover:not(:disabled) { border-color: var(--blue); transform: translateY(-1px); }
+    button:focus-visible, select:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .primary { color: #081326; background: var(--blue); border-color: var(--blue); font-weight: 750; }
+    .quiet { background: transparent; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: auto; }
+    header { padding: 26px 0 18px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 15px; background: #263c62; font-size: 25px; }
+    h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.15rem); letter-spacing: -.03em; }
+    .subtitle { margin: 5px 0 0; color: var(--muted); }
+    .intro {
+      margin: 14px 0 22px;
+      padding: 16px 19px;
+      border: 1px solid #38517a;
+      border-radius: 15px;
+      background: linear-gradient(110deg, #1b2a46, #14213a);
+    }
+    .intro strong { color: var(--yellow); }
+    .steps { display: flex; gap: 8px; margin: 20px 0; overflow-x: auto; }
+    .step {
+      flex: 1;
+      min-width: 155px;
+      padding: 10px 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      background: #101a2d;
+    }
+    .step b { color: var(--text); }
+    .step.current { border-color: var(--blue); background: #192a48; }
+    .step.done b { color: var(--green); }
+    main { display: grid; gap: 18px; padding-bottom: 38px; }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: clamp(16px, 3vw, 23px);
+      background: linear-gradient(145deg, rgba(22, 34, 58, .98), rgba(16, 26, 45, .98));
+      box-shadow: 0 16px 38px #02071140;
+    }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 14px; }
+    h2 { margin: 0; font-size: 1.25rem; }
+    h3 { margin: 0 0 5px; font-size: 1rem; }
+    .hint { color: var(--muted); margin: 5px 0 0; }
+    .badge { white-space: nowrap; padding: 5px 10px; border-radius: 99px; color: var(--blue); background: #243957; font-size: .85rem; }
+    .parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 10px; }
+    .part {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      min-height: 92px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #101a2c;
+      text-align: left;
+    }
+    .part.installed { border-color: #458e78; background: #142b30; }
+    .part-icon { font-size: 25px; line-height: 1.25; }
+    .part-name { display: block; font-weight: 700; }
+    .part-desc { display: block; margin-top: 2px; color: var(--muted); font-size: .85rem; }
+    .part-check { color: var(--green); font-size: .82rem; }
+    .info-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 13px; }
+    .notice { color: var(--muted); font-size: .92rem; }
+    .assembly-layout { display: grid; grid-template-columns: minmax(280px, 1.1fr) minmax(270px, .9fr); gap: 16px; align-items: start; }
+    .assembly-guide { margin: 0 0 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted); background: #101a2c; }
+    .assembly-guide strong { color: var(--yellow); }
+    .assembly-scene { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: radial-gradient(ellipse at 50% 38%, #1b3151, #0b1425 75%); }
+    .assembly-scene-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); background: #101a2ce8; }
+    .assembly-scene-toolbar button { min-height: 34px; padding: 4px 9px; }
+    #assembly-scene { display: block; width: 100%; height: 300px; touch-action: none; cursor: grab; }
+    #assembly-scene:active { cursor: grabbing; }
+    .assembly-caption { padding: 0 11px 9px; color: var(--muted); font-size: .8rem; }
+    .assembly-explanation { min-height: 72px; margin-top: 10px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); background: #101a2c; }
+    .assembly-explanation strong { color: var(--green); }
+    .workspace { display: grid; grid-template-columns: minmax(250px, .8fr) minmax(300px, 1.2fr); gap: 18px; align-items: start; }
+    .toolbox { display: grid; gap: 9px; }
+    .add-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    select { min-width: 0; min-height: 42px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 11px; color: var(--text); background: #101a2c; }
+    .blocks { display: grid; gap: 7px; min-height: 100px; margin: 10px 0; }
+    .block {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 7px 9px;
+      border: 1px solid #40577b;
+      border-left: 4px solid var(--blue);
+      border-radius: 9px;
+      background: #1a2b49;
+    }
+    .block:nth-child(3n + 2) { border-left-color: var(--yellow); }
+    .block:nth-child(3n) { border-left-color: var(--green); }
+    .block-label { flex: 1; }
+    .block button { min-height: 30px; padding: 2px 8px; border-radius: 7px; }
+    .block .remove { color: var(--red); }
+    .empty { padding: 12px; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; text-align: center; }
+    pre {
+      overflow-x: auto;
+      margin: 10px 0 0;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: #c5d7ff;
+      background: #0b1425;
+      font: .86rem/1.6 ui-monospace, Consolas, monospace;
+    }
+    .sim-layout { display: grid; grid-template-columns: minmax(280px, 1.25fr) minmax(200px, .65fr); gap: 18px; align-items: center; }
+    .scene-shell { overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: radial-gradient(ellipse at 50% 38%, #1b3151, #0b1425 75%); }
+    .scene-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; padding: 9px 10px; border-bottom: 1px solid var(--line); background: #101a2ce8; }
+    .scene-toolbar button { min-height: 34px; padding: 4px 9px; }
+    .scene-help { margin-left: auto; color: var(--muted); font-size: .8rem; }
+    #scene { display: block; width: 100%; height: clamp(300px, 40vw, 420px); touch-action: none; cursor: grab; }
+    #scene:active { cursor: grabbing; }
+    .scene-caption { padding: 0 12px 10px; color: var(--muted); font-size: .82rem; }
+    .sim-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .status {
+      min-height: 56px;
+      margin-top: 12px;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      color: var(--muted);
+      background: #101a2c;
+    }
+    .status.good { border-color: #458e78; color: var(--green); }
+    .status.warn { border-color: #92733d; color: var(--yellow); }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; color: var(--muted); font-size: .83rem; }
+    .lesson { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #101a2c; }
+    .lesson p { margin: 5px 0 0; color: var(--muted); }
+    .next { margin-top: 12px; }
+    footer { padding: 0 0 25px; color: var(--muted); text-align: center; font-size: .85rem; }
+    @media (max-width: 700px) {
+      .workspace, .sim-layout, .assembly-layout { grid-template-columns: 1fr; }
+      .panel-head { flex-wrap: wrap; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🤖</div>
+      <div>
+        <h1>Роболаб: собери и запрограммируй</h1>
+        <p class="subtitle">Виртуальная лаборатория робототехники · занятие 1: робот-исследователь</p>
+      </div>
+    </div>
+    <div class="intro"><strong>Задача:</strong> собери робота, составь программу и доведи его до зелёной клетки. Никаких специальных знаний не нужно — будем разбираться шаг за шагом.</div>
+    <nav class="steps" aria-label="Шаги лабораторной">
+      <div class="step current" id="step-1"><b>1 · Собери</b><br>выбери детали</div>
+      <div class="step" id="step-2"><b>2 · Запрограммируй</b><br>составь команды</div>
+      <div class="step" id="step-3"><b>3 · Проверь</b><br>запусти симуляцию</div>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="panel" aria-labelledby="assembly-title">
+      <div class="panel-head">
+        <div><h2 id="assembly-title">Шаг 1. Собираем робота в 3D</h2><p class="hint">Добавляй детали по очереди — увидишь, как они крепятся на модели. Перетаскивай 3D-модель, чтобы осмотреть её.</p></div>
+        <span class="badge" id="assembly-count">Установлено: 0 из 5</span>
+      </div>
+      <div class="assembly-guide"><strong>Порядок сборки:</strong> корпус → моторы → колёса → контроллер → датчик. Сначала основание, потом детали, которые движут робота, затем «мозг» и датчик. Контроллер связывает моторы и датчик с программой.</div>
+      <div class="assembly-layout">
+        <div>
+          <div class="parts" id="parts"></div>
+          <div class="info-row"><span class="notice" id="assembly-message" aria-live="polite">Начни с корпуса — это основа робота.</span><button id="install-all" class="quiet" type="button">Установить все детали</button></div>
+          <div class="assembly-explanation" id="part-explanation" aria-live="polite">Выбери деталь слева: объясню, куда она крепится и какую работу выполняет.</div>
+        </div>
+        <div class="assembly-scene">
+          <div class="assembly-scene-toolbar" aria-label="Управление видом сборки">
+            <button id="assembly-rotate-left" type="button" aria-label="Повернуть сборку влево">↶ Вид</button>
+            <button id="assembly-rotate-right" type="button" aria-label="Повернуть сборку вправо">↷ Вид</button>
+            <button id="assembly-zoom-in" type="button" aria-label="Приблизить сборку">＋</button>
+            <button id="assembly-zoom-out" type="button" aria-label="Отдалить сборку">−</button>
+          </div>
+          <canvas id="assembly-scene" role="img" aria-label="Объёмная модель сборки робота. Неустановленные детали показаны рядом с местами крепления."></canvas>
+          <div class="assembly-caption">Светлые детали ждут установки · перетащи модель, чтобы вращать</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="program-title">
+      <div class="panel-head">
+        <div><h2 id="program-title">Шаг 2. Придумываем программу</h2><p class="hint">Выбери команду и нажми «Добавить». Робот выполняет блоки сверху вниз: проверь один шаг или запусти всю программу.</p></div>
+        <span class="badge">Алгоритм = порядок действий</span>
+      </div>
+      <div class="workspace">
+        <div class="toolbox">
+          <div class="lesson">
+            <h3>Как думать как программист?</h3>
+            <p>Разбей большую задачу на маленькие шаги. Например: проехать вперёд, повернуть, снова проехать. Ошибка — это подсказка, что можно улучшить.</p>
+          </div>
+          <div class="add-row">
+            <select id="command-choice" aria-label="Выбери команду для программы">
+              <option value="forward">⬆️ Ехать вперёд на 1 клетку</option>
+              <option value="right">↪️ Повернуть направо</option>
+              <option value="left">↩️ Повернуть налево</option>
+              <option value="scan">📡 Проверить клетку впереди</option>
+              <option value="wait">⏸️ Подождать</option>
+            </select>
+            <button id="add-command" class="primary" type="button">Добавить</button>
+          </div>
+          <button id="example-program" type="button">Загрузить пример маршрута</button>
+        </div>
+        <div>
+          <div class="blocks" id="blocks" aria-label="Команды программы"></div>
+          <div class="notice">Та же программа в виде псевдокода:</div>
+          <pre id="code" aria-live="polite"></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="simulation-title">
+      <div class="panel-head">
+        <div><h2 id="simulation-title">Шаг 3. Испытываем робота</h2><p class="hint">Осматривай площадку в 3D: вращай её мышью или кнопками. Синий робот должен добраться до зелёной цели.</p></div>
+        <span class="badge" id="robot-state">Робот ждёт программу</span>
+      </div>
+      <div class="sim-layout">
+        <div>
+          <div class="scene-shell">
+            <div class="scene-toolbar" aria-label="Управление видом 3D-сцены">
+              <button id="rotate-left" type="button" aria-label="Повернуть вид влево">↶ Вид</button>
+              <button id="rotate-right" type="button" aria-label="Повернуть вид вправо">↷ Вид</button>
+              <button id="zoom-in" type="button" aria-label="Приблизить">＋</button>
+              <button id="zoom-out" type="button" aria-label="Отдалить">−</button>
+              <button id="view-reset" type="button">Сбросить вид</button>
+              <span class="scene-help">Зажми и перетащи, чтобы вращать</span>
+            </div>
+            <canvas id="scene" role="img" aria-label="Трёхмерная изометрическая модель робота и испытательной площадки"></canvas>
+            <div class="scene-caption">🔵 Робот · 🟩 цель · 🟥 препятствия · 🟨 старт</div>
+          </div>
+          <div class="sim-controls">
+            <button id="run" class="primary" type="button">▶ Запустить</button>
+            <button id="step" type="button">⏭ Один шаг</button>
+            <button id="reset" type="button">↺ Сначала</button>
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite">Установи детали и нажми «Запустить».</div>
+        </div>
+        <div class="lesson">
+          <h3>Что такое датчик?</h3>
+          <p>Датчик — это «чувство» робота. Команда проверки смотрит на клетку впереди. Установи датчик, чтобы добавить такую команду в программу.</p>
+          <h3>Почему здесь 3D?</h3>
+          <p>Объёмная сцена помогает увидеть робота, колёса, датчик и препятствия. Перетаскивай площадку, чтобы рассмотреть её с разных сторон.</p>
+          <h3 style="margin-top:15px">Что такое симуляция?</h3>
+          <p>Это безопасная виртуальная модель. Здесь можно проверить идею, заметить ошибку и попробовать снова — до сборки настоящего робота.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">Лабораторная работает в браузере и не отправляет данные в интернет.</footer>
+
+  <script>
+    (() => {
+      const partData = [
+        { id: "body", icon: "🧱", name: "Корпус", desc: "Основа для крепления деталей", needs: [], role: "Это рама робота. На неё крепятся остальные узлы — как на шасси велосипеда или автомобиля." },
+        { id: "motors", icon: "⚙️", name: "Моторы", desc: "Превращают электричество в движение", needs: ["body"], role: "Моторы крепятся по бокам корпуса и вращают колёса. В программе ими управляет команда «ехать вперёд»." },
+        { id: "wheels", icon: "🛞", name: "Колёса", desc: "Крепятся к моторам и едут", needs: ["body", "motors"], role: "Колёса надеваются на моторы. Без моторов они сами не крутятся, а без колёс мотор не толкнёт робота по полу." },
+        { id: "controller", icon: "🧠", name: "Контроллер", desc: "«Мозг», который выполняет программу", needs: ["body"], role: "Контроллер крепится сверху на корпус. В него загружают алгоритм: ехать, повернуть, проверить путь." },
+        { id: "sensor", icon: "📡", name: "Датчик расстояния", desc: "Замечает препятствия впереди", needs: ["body", "controller"], role: "Датчик ставится спереди и соединяется с контроллером. Он сообщает программе, свободен ли путь." }
+      ];
+      const commandData = {
+        forward: { label: "Ехать вперёд на 1 клетку", code: "ехатьВперёд()" },
+        right: { label: "Повернуть направо", code: "повернутьНаправо()" },
+        left: { label: "Повернуть налево", code: "повернутьНалево()" },
+        scan: { label: "Проверить клетку впереди", code: "проверитьВпереди()" },
+        wait: { label: "Подождать", code: "подождать()" }
+      };
+      const requiredParts = ["body", "controller", "motors", "wheels"];
+      const obstacles = new Set(["3,3", "4,2", "5,3"]);
+      const goal = { x: 5, y: 1 };
+      const directionNames = ["восток", "юг", "запад", "север"];
+      const assemblyOrder = ["body", "motors", "wheels", "controller", "sensor"];
+      let installed = new Set();
+      let commands = [];
+      let robot = { x: 0, y: 3, dir: 0 };
+      let running = false;
+      let halted = false;
+      let runToken = 0;
+
+      const $ = (id) => document.getElementById(id);
+      const partsEl = $("parts");
+      const blocksEl = $("blocks");
+      const scene = $("scene");
+      const sceneContext = scene.getContext("2d");
+      const assemblyScene = $("assembly-scene");
+      const assemblyContext = assemblyScene.getContext("2d");
+      let viewYaw = 0.12;
+      let viewZoom = 1;
+      let visualRobot = { x: robot.x, y: robot.y, dir: robot.dir };
+      let robotAnimation = 0;
+      let selectedPart = "body";
+
+      function project(x, y, z, centerX, centerY, unitX, unitY, unitZ) {
+        const cosine = Math.cos(viewYaw);
+        const sine = Math.sin(viewYaw);
+        const rotatedX = x * cosine - y * sine;
+        const rotatedY = x * sine + y * cosine;
+        return {
+          x: centerX + (rotatedX - rotatedY) * unitX,
+          y: centerY + (rotatedX + rotatedY) * unitY - z * unitZ
+        };
+      }
+
+      function drawPolygon(context, points, fill, stroke = "") {
+        context.beginPath();
+        context.moveTo(points[0].x, points[0].y);
+        for (let index = 1; index < points.length; index++) context.lineTo(points[index].x, points[index].y);
+        context.closePath();
+        context.fillStyle = fill;
+        context.fill();
+        if (stroke) {
+          context.strokeStyle = stroke;
+          context.lineWidth = 1;
+          context.stroke();
+        }
+      }
+
+      function drawBox(context, x, y, width, depth, height, color, centerX, centerY, unitX, unitY, unitZ, zOffset = 0) {
+        const vertices = [
+          [-width / 2, -depth / 2, zOffset], [width / 2, -depth / 2, zOffset],
+          [width / 2, depth / 2, zOffset], [-width / 2, depth / 2, zOffset],
+          [-width / 2, -depth / 2, height + zOffset], [width / 2, -depth / 2, height + zOffset],
+          [width / 2, depth / 2, height + zOffset], [-width / 2, depth / 2, height + zOffset]
+        ];
+        const faces = [
+          { indices: [4, 5, 6, 7], normal: [0, 0, 1], color },
+          { indices: [1, 2, 6, 5], normal: [1, 0, 0], color: shadeColor(color, -35) },
+          { indices: [0, 3, 7, 4], normal: [-1, 0, 0], color: shadeColor(color, -35) },
+          { indices: [3, 2, 6, 7], normal: [0, 1, 0], color: shadeColor(color, -18) },
+          { indices: [0, 1, 5, 4], normal: [0, -1, 0], color: shadeColor(color, -18) }
+        ];
+        const cameraX = Math.cos(viewYaw) + Math.sin(viewYaw);
+        const cameraY = Math.cos(viewYaw) - Math.sin(viewYaw);
+        const visibleFaces = faces.filter((face) => face.normal[2] > 0 ||
+          face.normal[0] * cameraX + face.normal[1] * cameraY > 0.001);
+        visibleFaces.sort((first, second) => {
+          const depth = (face) => face.indices.reduce((sum, index) => {
+            const [dx, dy, z] = vertices[index];
+            const rotatedX = dx * Math.cos(viewYaw) - dy * Math.sin(viewYaw);
+            const rotatedY = dx * Math.sin(viewYaw) + dy * Math.cos(viewYaw);
+            return sum + rotatedX + rotatedY + z * 0.65;
+          }, 0) / face.indices.length;
+          return depth(first) - depth(second);
+        });
+        for (const face of visibleFaces) {
+          const points = face.indices.map((index) => {
+            const [dx, dy, z] = vertices[index];
+            return project(x + dx, y + dy, z, centerX, centerY, unitX, unitY, unitZ);
+          });
+          drawPolygon(context, points, face.color, "#d9e7ff77");
+        }
+      }
+
+      function shadeColor(hex, amount) {
+        const value = Number.parseInt(hex.slice(1), 16);
+        const red = Math.max(0, Math.min(255, (value >> 16) + amount));
+        const green = Math.max(0, Math.min(255, ((value >> 8) & 255) + amount));
+        const blue = Math.max(0, Math.min(255, (value & 255) + amount));
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
+
+      function drawScene() {
+        const width = scene.clientWidth;
+        const height = scene.clientHeight;
+        if (!width || !height) return;
+        const pixelRatio = window.devicePixelRatio || 1;
+        if (scene.width !== Math.round(width * pixelRatio) || scene.height !== Math.round(height * pixelRatio)) {
+          scene.width = Math.round(width * pixelRatio);
+          scene.height = Math.round(height * pixelRatio);
+        }
+        sceneContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        sceneContext.clearRect(0, 0, width, height);
+
+        const tile = Math.min(width / 12, height / 8.5) * viewZoom;
+        const unitX = tile * 0.5;
+        const unitY = tile * 0.29;
+        const unitZ = tile * 0.64;
+        const centerX = width / 2;
+        const centerY = height * 0.5;
+
+        for (let y = -0.5; y < 4.5; y++) {
+          for (let x = -0.5; x < 6.5; x++) {
+            const tileX = x + 0.5;
+            const tileY = y + 0.5;
+            const corners = [
+              project(tileX - 0.5, tileY - 0.5, 0, centerX, centerY, unitX, unitY, unitZ),
+              project(tileX + 0.5, tileY - 0.5, 0, centerX, centerY, unitX, unitY, unitZ),
+              project(tileX + 0.5, tileY + 0.5, 0, centerX, centerY, unitX, unitY, unitZ),
+              project(tileX - 0.5, tileY + 0.5, 0, centerX, centerY, unitX, unitY, unitZ)
+            ];
+            const fill = tileX === goal.x && tileY === goal.y ? "#1b594c" :
+              x === -0.5 && y === 2.5 ? "#66552d" :
+              (x + y) % 2 === 0 ? "#253854" : "#20314b";
+            drawPolygon(sceneContext, corners, fill, "#8198b333");
+          }
+        }
+
+        const goalCenter = project(goal.x, goal.y, 0.03, centerX, centerY, unitX, unitY, unitZ);
+        sceneContext.beginPath();
+        sceneContext.ellipse(goalCenter.x, goalCenter.y, tile * 0.25, tile * 0.13, 0, 0, Math.PI * 2);
+        sceneContext.strokeStyle = "#8fffd0";
+        sceneContext.lineWidth = 3;
+        sceneContext.stroke();
+        sceneContext.fillStyle = "#8fffd044";
+        sceneContext.fill();
+        for (const dx of [-0.18, 0.18]) {
+          const post = project(goal.x + dx, goal.y, 0.2, centerX, centerY, unitX, unitY, unitZ);
+          sceneContext.beginPath();
+          sceneContext.arc(post.x, post.y, tile * 0.045, 0, Math.PI * 2);
+          sceneContext.fillStyle = "#a1ffda";
+          sceneContext.fill();
+        }
+
+        const objects = [];
+        const addObject = (x, y, z, draw) => {
+          const rotatedX = x * Math.cos(viewYaw) - y * Math.sin(viewYaw);
+          const rotatedY = x * Math.sin(viewYaw) + y * Math.cos(viewYaw);
+          objects.push({ depth: rotatedX + rotatedY + z * 0.65, draw });
+        };
+        const addBox = (x, y, z, boxWidth, boxDepth, boxHeight, color) => {
+          addObject(x, y, z + boxHeight / 2, () => drawBox(
+            sceneContext, x, y, boxWidth, boxDepth, boxHeight, color,
+            centerX, centerY, unitX, unitY, unitZ, z
+          ));
+        };
+
+        for (const obstacle of obstacles) {
+          const [x, y] = obstacle.split(",").map(Number);
+          addBox(x, y, 0, 0.58, 0.58, 0.62, "#d96570");
+        }
+
+        const robotX = visualRobot.x;
+        const robotY = visualRobot.y;
+        const forward = [Math.cos(visualRobot.dir * Math.PI / 2), Math.sin(visualRobot.dir * Math.PI / 2)];
+        const side = [-forward[1], forward[0]];
+        addObject(robotX, robotY, 0.01, () => {
+          const shadow = project(robotX, robotY, 0.015, centerX, centerY, unitX, unitY, unitZ);
+          sceneContext.fillStyle = "#00000055";
+          sceneContext.beginPath();
+          sceneContext.ellipse(shadow.x, shadow.y, tile * 0.28, tile * 0.14, 0, 0, Math.PI * 2);
+          sceneContext.fill();
+        });
+
+        if (installed.has("wheels")) {
+          for (const along of [-0.2, 0.2]) {
+            for (const across of [-0.31, 0.31]) {
+              const wheelX = robotX + forward[0] * along + side[0] * across;
+              const wheelY = robotY + forward[1] * along + side[1] * across;
+              addObject(wheelX, wheelY, 0.14, () => {
+                const wheel = project(wheelX, wheelY, 0.14, centerX, centerY, unitX, unitY, unitZ);
+                const wheelAxis = project(wheelX + side[0], wheelY + side[1], 0.14, centerX, centerY, unitX, unitY, unitZ);
+                const angle = Math.atan2(wheelAxis.y - wheel.y, wheelAxis.x - wheel.x);
+                sceneContext.beginPath();
+                sceneContext.ellipse(wheel.x, wheel.y, tile * 0.075, tile * 0.12, angle, 0, Math.PI * 2);
+                sceneContext.fillStyle = "#101722";
+                sceneContext.fill();
+                sceneContext.strokeStyle = "#a6bddb";
+                sceneContext.lineWidth = 2;
+                sceneContext.stroke();
+                sceneContext.beginPath();
+                sceneContext.ellipse(wheel.x, wheel.y, tile * 0.035, tile * 0.055, angle, 0, Math.PI * 2);
+                sceneContext.strokeStyle = "#7186a4";
+                sceneContext.lineWidth = 1.5;
+                sceneContext.stroke();
+              });
+            }
+          }
+        }
+
+        if (installed.has("motors")) {
+          addBox(robotX - side[0] * 0.35, robotY - side[1] * 0.35, 0.13, 0.24, 0.18, 0.18, "#f4af55");
+          addBox(robotX + side[0] * 0.35, robotY + side[1] * 0.35, 0.13, 0.24, 0.18, 0.18, "#f4af55");
+        }
+        if (installed.has("body")) addBox(robotX, robotY, 0.16, 0.52, 0.42, 0.24, "#50a6ff");
+        if (installed.has("controller")) addBox(robotX, robotY, 0.4, 0.28, 0.24, 0.2, "#76d8a5");
+        if (installed.has("sensor")) {
+          const sensorX = robotX + forward[0] * 0.38;
+          const sensorY = robotY + forward[1] * 0.38;
+          addObject(sensorX, sensorY, 0.52, () => {
+            const sensor = project(sensorX, sensorY, 0.52, centerX, centerY, unitX, unitY, unitZ);
+            sceneContext.beginPath();
+            sceneContext.arc(sensor.x, sensor.y, tile * 0.07, 0, Math.PI * 2);
+            sceneContext.fillStyle = "#ffd477";
+            sceneContext.fill();
+            sceneContext.strokeStyle = "#fff2c6";
+            sceneContext.lineWidth = 2;
+            sceneContext.stroke();
+          });
+        }
+        addObject(robotX + forward[0] * 0.3, robotY + forward[1] * 0.3, 0.42, () => {
+          const nose = project(robotX + forward[0] * 0.48, robotY + forward[1] * 0.48, 0.34, centerX, centerY, unitX, unitY, unitZ);
+          const leftNose = project(robotX + forward[0] * 0.16 + side[0] * 0.13, robotY + forward[1] * 0.16 + side[1] * 0.13, 0.34, centerX, centerY, unitX, unitY, unitZ);
+          const rightNose = project(robotX + forward[0] * 0.16 - side[0] * 0.13, robotY + forward[1] * 0.16 - side[1] * 0.13, 0.34, centerX, centerY, unitX, unitY, unitZ);
+          drawPolygon(sceneContext, [nose, leftNose, rightNose], "#eff7ff");
+        });
+        objects.sort((first, second) => first.depth - second.depth);
+        for (const object of objects) object.draw();
+
+        if (installed.size === 0) {
+          sceneContext.fillStyle = "#d8e4f8";
+          sceneContext.font = "14px system-ui, sans-serif";
+          sceneContext.textAlign = "center";
+          sceneContext.fillText("Собери робота — нажми на детали выше", width / 2, height - 15);
+        }
+      }
+
+      function drawAssemblyScene() {
+        const width = assemblyScene.clientWidth;
+        const height = assemblyScene.clientHeight;
+        if (!width || !height) return;
+        const pixelRatio = window.devicePixelRatio || 1;
+        if (assemblyScene.width !== Math.round(width * pixelRatio) || assemblyScene.height !== Math.round(height * pixelRatio)) {
+          assemblyScene.width = Math.round(width * pixelRatio);
+          assemblyScene.height = Math.round(height * pixelRatio);
+        }
+        assemblyContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        assemblyContext.clearRect(0, 0, width, height);
+
+        const tile = Math.min(width / 4.9, height / 3.2) * viewZoom;
+        const unitX = tile * 0.5;
+        const unitY = tile * 0.3;
+        const unitZ = tile * 0.64;
+        const centerX = width / 2;
+        const centerY = height * 0.59;
+        const robotX = 0;
+        const robotY = 0;
+        const forward = [1, 0];
+        const side = [-forward[1], forward[0]];
+
+        assemblyContext.fillStyle = "#00000044";
+        assemblyContext.beginPath();
+        const shadow = project(robotX, robotY, 0, centerX, centerY, unitX, unitY, unitZ);
+        assemblyContext.ellipse(shadow.x, shadow.y, tile * 0.65, tile * 0.35, 0, 0, Math.PI * 2);
+        assemblyContext.fill();
+
+        function componentBox(partId, position, mounted, widthInTiles, depthInTiles, heightInTiles, color) {
+          const alpha = installed.has(partId) ? 1 : 0.38;
+          const raised = installed.has(partId) ? 0 : 0.5;
+          if (!installed.has(partId)) {
+            const socket = project(position.x, position.y, mounted, centerX, centerY, unitX, unitY, unitZ);
+            const floating = project(position.x, position.y, mounted + raised, centerX, centerY, unitX, unitY, unitZ);
+            assemblyContext.save();
+            assemblyContext.globalAlpha = 0.48;
+            assemblyContext.setLineDash([4, 4]);
+            assemblyContext.strokeStyle = color;
+            assemblyContext.beginPath();
+            assemblyContext.moveTo(socket.x, socket.y);
+            assemblyContext.lineTo(floating.x, floating.y);
+            assemblyContext.stroke();
+            assemblyContext.restore();
+          }
+          assemblyContext.save();
+          assemblyContext.globalAlpha = alpha;
+          drawBox(
+            assemblyContext, position.x, position.y, widthInTiles, depthInTiles, heightInTiles,
+            color, centerX, centerY, unitX, unitY, unitZ, raised
+          );
+          assemblyContext.restore();
+        }
+
+        function assemblyWheel(x, y) {
+          const mounted = installed.has("wheels");
+          const height = mounted ? 0.14 : 0.64;
+          if (!mounted) {
+            const socket = project(x, y, 0.14, centerX, centerY, unitX, unitY, unitZ);
+            const floating = project(x, y, height, centerX, centerY, unitX, unitY, unitZ);
+            assemblyContext.save();
+            assemblyContext.globalAlpha = 0.48;
+            assemblyContext.setLineDash([4, 4]);
+            assemblyContext.strokeStyle = "#a6bddb";
+            assemblyContext.beginPath();
+            assemblyContext.moveTo(socket.x, socket.y);
+            assemblyContext.lineTo(floating.x, floating.y);
+            assemblyContext.stroke();
+            assemblyContext.restore();
+          }
+          const point = project(x, y, height, centerX, centerY, unitX, unitY, unitZ);
+          assemblyContext.save();
+          assemblyContext.globalAlpha = mounted ? 1 : 0.38;
+          assemblyContext.beginPath();
+          assemblyContext.ellipse(point.x, point.y, tile * 0.11, tile * 0.15, viewYaw, 0, Math.PI * 2);
+          assemblyContext.fillStyle = "#101722";
+          assemblyContext.fill();
+          assemblyContext.strokeStyle = mounted ? "#a6bddb" : "#687b98";
+          assemblyContext.lineWidth = 2;
+          assemblyContext.stroke();
+          assemblyContext.restore();
+        }
+
+        for (const along of [-0.23, 0.23]) {
+          for (const across of [-0.39, 0.39]) {
+            assemblyWheel(robotX + forward[0] * along + side[0] * across, robotY + forward[1] * along + side[1] * across);
+          }
+        }
+
+        componentBox("motors", { x: robotX - side[0] * 0.37, y: robotY - side[1] * 0.37 }, 0.12, 0.3, 0.18, 0.18, "#f4af55");
+        componentBox("motors", { x: robotX + side[0] * 0.37, y: robotY + side[1] * 0.37 }, 0.12, 0.3, 0.18, 0.18, "#f4af55");
+        componentBox("body", { x: robotX, y: robotY }, 0.02, 0.8, 0.64, 0.28, "#50a6ff");
+        componentBox("controller", { x: robotX, y: robotY }, 0.3, 0.38, 0.3, 0.23, "#76d8a5");
+
+        const sensorX = robotX + forward[0] * 0.52;
+        const sensorY = robotY + forward[1] * 0.52;
+        componentBox("sensor", { x: sensorX, y: sensorY }, 0.37, 0.2, 0.2, 0.16, "#ffd477");
+        const sensorDot = project(sensorX, sensorY, installed.has("sensor") ? 0.49 : 0.99, centerX, centerY, unitX, unitY, unitZ);
+        assemblyContext.beginPath();
+        assemblyContext.arc(sensorDot.x, sensorDot.y, tile * 0.055, 0, Math.PI * 2);
+        assemblyContext.fillStyle = installed.has("sensor") ? "#fff2c6" : "#ffe4a0";
+        assemblyContext.globalAlpha = installed.has("sensor") ? 1 : 0.45;
+        assemblyContext.fill();
+        assemblyContext.globalAlpha = 1;
+
+        assemblyContext.fillStyle = "#d8e4f8";
+        assemblyContext.font = "12px system-ui, sans-serif";
+        assemblyContext.textAlign = "center";
+        assemblyContext.fillText("Подсказка: поднимай взгляд и вращай модель", width / 2, height - 12);
+      }
+
+      function updateSceneRobot(animate = true) {
+        if (robotAnimation) window.cancelAnimationFrame(robotAnimation);
+        const start = { ...visualRobot };
+        const target = { ...robot };
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (!animate || prefersReducedMotion) {
+          visualRobot = target;
+          drawScene();
+          return;
+        }
+        const startTime = performance.now();
+        const difference = ((target.dir - start.dir + 6) % 4) - 2;
+        function frame(now) {
+          const progress = Math.min(1, (now - startTime) / 260);
+          const eased = 1 - (1 - progress) ** 3;
+          visualRobot = {
+            x: start.x + (target.x - start.x) * eased,
+            y: start.y + (target.y - start.y) * eased,
+            dir: (start.dir + difference * eased + 4) % 4
+          };
+          drawScene();
+          if (progress < 1) robotAnimation = window.requestAnimationFrame(frame);
+          else robotAnimation = 0;
+        }
+        robotAnimation = window.requestAnimationFrame(frame);
+      }
+
+      function setZoom(zoom) {
+        viewZoom = Math.max(0.7, Math.min(1.35, zoom));
+        drawScene();
+        drawAssemblyScene();
+      }
+
+      function bindSceneControls() {
+        function rotate(amount) {
+          viewYaw += amount;
+          drawScene();
+          drawAssemblyScene();
+        }
+        $("rotate-left").addEventListener("click", () => rotate(-0.35));
+        $("rotate-right").addEventListener("click", () => rotate(0.35));
+        $("zoom-in").addEventListener("click", () => setZoom(viewZoom + 0.1));
+        $("zoom-out").addEventListener("click", () => setZoom(viewZoom - 0.1));
+        $("view-reset").addEventListener("click", () => { viewYaw = 0.12; setZoom(1); });
+        $("assembly-rotate-left").addEventListener("click", () => rotate(-0.35));
+        $("assembly-rotate-right").addEventListener("click", () => rotate(0.35));
+        $("assembly-zoom-in").addEventListener("click", () => setZoom(viewZoom + 0.1));
+        $("assembly-zoom-out").addEventListener("click", () => setZoom(viewZoom - 0.1));
+        for (const canvas of [scene, assemblyScene]) {
+          let dragX = null;
+          canvas.addEventListener("pointerdown", (event) => {
+            dragX = event.clientX;
+            canvas.setPointerCapture(event.pointerId);
+          });
+          canvas.addEventListener("pointermove", (event) => {
+            if (dragX === null) return;
+            viewYaw += (event.clientX - dragX) * 0.012;
+            dragX = event.clientX;
+            drawScene();
+            drawAssemblyScene();
+          });
+          canvas.addEventListener("pointerup", () => { dragX = null; });
+          canvas.addEventListener("pointercancel", () => { dragX = null; });
+          canvas.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            setZoom(viewZoom + (event.deltaY < 0 ? 0.06 : -0.06));
+          }, { passive: false });
+        }
+        window.addEventListener("resize", () => { drawScene(); drawAssemblyScene(); });
+      }
+
+      bindSceneControls();
+
+      function coreReady() {
+        return requiredParts.every((part) => installed.has(part));
+      }
+
+      function renderParts() {
+        partsEl.replaceChildren();
+        for (const part of partData) {
+          const order = assemblyOrder.indexOf(part.id) + 1;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = `part${installed.has(part.id) ? " installed" : ""}`;
+          button.setAttribute("aria-pressed", String(installed.has(part.id)));
+          button.disabled = running;
+          button.innerHTML = `<span class="part-icon" aria-hidden="true">${part.icon}</span><span><span class="part-name">${order}. ${part.name}</span><span class="part-desc">${part.desc}</span><span class="part-check">${installed.has(part.id) ? "✓ Установлено · нажми, чтобы снять" : "Нажми, чтобы поставить"}</span></span>`;
+          button.addEventListener("click", () => {
+            selectedPart = part.id;
+            const explanation = $("part-explanation");
+            const title = document.createElement("strong");
+            title.textContent = `${part.icon} ${part.name}. `;
+            explanation.replaceChildren(title, document.createTextNode(part.role));
+
+            if (installed.has(part.id)) {
+              const attached = partData.find((other) => installed.has(other.id) && other.needs.includes(part.id));
+              if (attached) {
+                setStatus(`Сначала сними «${attached.name}», она крепится к детали «${part.name}».`, "warn");
+                return;
+              }
+              installed.delete(part.id);
+            } else {
+              const missing = part.needs.find((need) => !installed.has(need));
+              if (missing) {
+                const neededPart = partData.find((item) => item.id === missing);
+                setStatus(`Сначала установи «${neededPart.name}» — на неё крепится «${part.name}».`, "warn");
+                return;
+              }
+              installed.add(part.id);
+            }
+            if (!installed.has("sensor")) commands = commands.filter((command) => command !== "scan");
+            renderParts();
+            renderCommands();
+            updateAssemblyMessage();
+            renderBoard(false);
+          });
+          partsEl.append(button);
+        }
+        const count = [...installed].length;
+        $("assembly-count").textContent = `Установлено: ${count} из ${partData.length}`;
+        drawAssemblyScene();
+      }
+
+      function updateAssemblyMessage() {
+        const missing = assemblyOrder.find((part) => !installed.has(part));
+        if (missing) {
+          const next = partData.find((part) => part.id === missing);
+          const needs = next.needs.map((id) => partData.find((part) => part.id === id).name);
+          $("assembly-message").textContent = needs.length
+            ? `Шаг ${assemblyOrder.indexOf(missing) + 1}: установи «${next.name}». Сначала нужны: ${needs.join(", ")}.`
+            : `Шаг ${assemblyOrder.indexOf(missing) + 1}: установи «${next.name}» — это основание для остальных деталей.`;
+        } else {
+          $("assembly-message").textContent = "Робот собран! Контроллер выполняет программу, моторы вращают колёса, а датчик помогает замечать препятствия.";
+        }
+        $("step-1").classList.toggle("done", coreReady());
+        $("step-1").classList.toggle("current", !coreReady());
+        $("step-2").classList.toggle("current", coreReady() && commands.length === 0);
+      }
+
+      function renderCommands() {
+        blocksEl.replaceChildren();
+        if (commands.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "Пока нет команд. Добавь первую команду слева.";
+          blocksEl.append(empty);
+        }
+        commands.forEach((command, index) => {
+          const block = document.createElement("div");
+          block.className = "block";
+          const label = document.createElement("span");
+          label.className = "block-label";
+          label.textContent = `${index + 1}. ${commandData[command].label}`;
+          block.append(label);
+          for (const [symbol, action, text] of [
+            ["↑", () => moveCommand(index, -1), `Переместить команду ${index + 1} выше`],
+            ["↓", () => moveCommand(index, 1), `Переместить команду ${index + 1} ниже`],
+            ["×", () => { commands.splice(index, 1); renderCommands(); updateAssemblyMessage(); }, `Удалить команду ${index + 1}`]
+          ]) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = symbol;
+            button.setAttribute("aria-label", text);
+            if (symbol === "×") button.className = "remove";
+            button.disabled = (symbol === "↑" && index === 0) || (symbol === "↓" && index === commands.length - 1);
+            if (symbol !== "×") button.dataset.orderBoundary = String(button.disabled);
+            button.addEventListener("click", action);
+            block.append(button);
+          }
+          blocksEl.append(block);
+        });
+        $("code").textContent = commands.length ? commands.map((command) => commandData[command].code).join("\n") : "// Здесь появятся команды робота";
+        $("step-2").classList.toggle("done", commands.length > 0);
+        $("step-2").classList.toggle("current", coreReady() && commands.length === 0);
+        updateControls();
+      }
+
+      function moveCommand(index, delta) {
+        const target = index + delta;
+        [commands[index], commands[target]] = [commands[target], commands[index]];
+        renderCommands();
+      }
+
+      function addCommand(command) {
+        if (command === "scan" && !installed.has("sensor")) {
+          setStatus("Сначала установи датчик расстояния — тогда робот сможет проверять путь.", "warn");
+          return;
+        }
+        commands.push(command);
+        renderCommands();
+        updateAssemblyMessage();
+      }
+
+      function renderBoard(animate = true) {
+        $("robot-state").textContent = halted ? "Робот остановлен" : `Робот смотрит на ${directionNames[robot.dir]}`;
+        updateSceneRobot(animate);
+      }
+
+      function setStatus(message, kind = "") {
+        const status = $("status");
+        status.className = `status${kind ? ` ${kind}` : ""}`;
+        status.textContent = message;
+      }
+
+      function updateControls() {
+        const locked = running;
+        $("run").disabled = locked || !coreReady() || commands.length === 0;
+        $("step").disabled = locked || !coreReady() || commands.length === 0 || halted;
+        $("reset").disabled = locked;
+        $("add-command").disabled = locked;
+        $("example-program").disabled = locked;
+        $("install-all").disabled = locked;
+        for (const button of partsEl.querySelectorAll("button")) button.disabled = locked;
+        for (const button of blocksEl.querySelectorAll("button")) {
+          button.disabled = locked || button.dataset.orderBoundary === "true";
+        }
+      }
+
+      function resetSimulation(message = "Готово к запуску. Попробуй составить маршрут до цели.") {
+        runToken++;
+        robot = { x: 0, y: 3, dir: 0 };
+        halted = false;
+        renderBoard(false);
+        setStatus(message);
+        updateControls();
+      }
+
+      function applyCommand(command) {
+        if (command === "right") {
+          robot.dir = (robot.dir + 1) % 4;
+          setStatus(`Поворот направо. Теперь робот смотрит на ${directionNames[robot.dir]}.`);
+        } else if (command === "left") {
+          robot.dir = (robot.dir + 3) % 4;
+          setStatus(`Поворот налево. Теперь робот смотрит на ${directionNames[robot.dir]}.`);
+        } else if (command === "wait") {
+          setStatus("Робот подождал. Иногда пауза нужна, чтобы дождаться сигнала.");
+        } else if (command === "scan") {
+          const [dx, dy] = [[1, 0], [0, 1], [-1, 0], [0, -1]][robot.dir];
+          const next = `${robot.x + dx},${robot.y + dy}`;
+          setStatus(obstacles.has(next) ? "Датчик заметил препятствие впереди! Не двигайся — измени маршрут." : "Путь свободен: датчик не заметил препятствий впереди.", obstacles.has(next) ? "warn" : "good");
+        } else if (command === "forward") {
+          const [dx, dy] = [[1, 0], [0, 1], [-1, 0], [0, -1]][robot.dir];
+          const x = robot.x + dx;
+          const y = robot.y + dy;
+          if (x < 0 || x >= 7 || y < 0 || y >= 5 || obstacles.has(`${x},${y}`)) {
+            halted = true;
+            setStatus("Столкновение! Робот встретил стену или препятствие. Нажми «Сначала» и измени программу.", "warn");
+            renderBoard();
+            return false;
+          }
+          robot.x = x;
+          robot.y = y;
+          if (robot.x === goal.x && robot.y === goal.y) {
+            halted = true;
+            setStatus("Цель достигнута! Ты составил(а) рабочий алгоритм. Попробуй найти другой маршрут.", "good");
+            $("step-3").classList.add("done");
+          } else {
+            setStatus(`Робот проехал одну клетку. Координаты: столбец ${robot.x + 1}, ряд ${robot.y + 1}.`);
+          }
+        }
+        renderBoard();
+        return true;
+      }
+
+      function runOneStep() {
+        if (!coreReady()) {
+          setStatus("Сначала установи корпус, контроллер, моторы и колёса.", "warn");
+          return false;
+        }
+        if (commands.length === 0) {
+          setStatus("Добавь хотя бы одну команду в программу.", "warn");
+          return false;
+        }
+        if (halted) return false;
+        if (robot.x === goal.x && robot.y === goal.y) return false;
+        if (runOneStep.index >= commands.length) {
+          halted = true;
+          setStatus("Команды закончились, но цель ещё не достигнута. Измени программу и попробуй снова.", "warn");
+          updateControls();
+          return false;
+        }
+        const command = commands[runOneStep.index++];
+        const continuing = applyCommand(command);
+        if (!continuing || halted) {
+          updateControls();
+          return false;
+        }
+        if (runOneStep.index >= commands.length && (robot.x !== goal.x || robot.y !== goal.y)) {
+          halted = true;
+          setStatus("Команды закончились, но цель ещё не достигнута. Измени программу и попробуй снова.", "warn");
+        }
+        updateControls();
+        return true;
+      }
+      runOneStep.index = 0;
+
+      async function playProgram() {
+        if (running) return;
+        resetSimulation("Робот выполняет программу…");
+        runOneStep.index = 0;
+        running = true;
+        updateControls();
+        const token = ++runToken;
+        for (let i = 0; i < commands.length && token === runToken; i++) {
+          await new Promise((resolve) => window.setTimeout(resolve, 450));
+          if (token !== runToken) break;
+          runOneStep();
+          if (halted) break;
+        }
+        running = false;
+        updateControls();
+      }
+
+      $("install-all").addEventListener("click", () => {
+        installed = new Set(partData.map((part) => part.id));
+        selectedPart = "sensor";
+        renderParts();
+        renderCommands();
+        updateAssemblyMessage();
+        const selected = partData.find((part) => part.id === selectedPart);
+        const title = document.createElement("strong");
+        title.textContent = `${selected.icon} ${selected.name}. `;
+        $("part-explanation").replaceChildren(title, document.createTextNode(selected.role));
+        setStatus("Все детали установлены. Теперь составь программу.", "good");
+      });
+      $("add-command").addEventListener("click", () => addCommand($("command-choice").value));
+      $("example-program").addEventListener("click", () => {
+        if (!installed.has("sensor")) {
+          setStatus("Для примера нужна команда датчика. Сначала установи датчик расстояния.", "warn");
+          return;
+        }
+        commands = ["forward", "forward", "scan", "left", "forward", "forward", "right", "forward", "forward", "forward"];
+        runOneStep.index = 0;
+        halted = false;
+        $("step-3").classList.remove("done");
+        renderCommands();
+        updateAssemblyMessage();
+        resetSimulation("Пример загружен. Нажми «Запустить» и наблюдай за роботом.");
+      });
+      $("run").addEventListener("click", playProgram);
+      $("step").addEventListener("click", () => {
+        if (runOneStep.index === 0 && (robot.x !== 0 || robot.y !== 3 || robot.dir !== 0 || halted)) resetSimulation();
+        runOneStep();
+      });
+      $("reset").addEventListener("click", () => {
+        runOneStep.index = 0;
+        $("step-3").classList.remove("done");
+        resetSimulation("Робот вернулся на старт. Можно запускать программу снова.");
+      });
+
+      renderParts();
+      renderCommands();
+      updateAssemblyMessage();
+      renderBoard(false);
+      drawAssemblyScene();
+    })();
+  </script>
+</body>
+</html>
